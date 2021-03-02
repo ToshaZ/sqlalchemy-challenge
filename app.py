@@ -39,6 +39,7 @@ def index():
         f"/api/v1.0/tobs"
     )
 
+#################################################
 @app.route("/api/v1.0/precipitation")
 def precipitation():
         # Create our session (link) from Python to the DB
@@ -60,23 +61,41 @@ def precipitation():
 
         return jsonify(rain_list)
 
+#################################################
 @app.route("/api/v1.0/stations")
 def stations():
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
-    # Query Stations
+    # Query
     results = session.query(station.name).all()
+
+    session.close()
 
     # Convert list of tuples into normal list
     station_list = list(np.ravel(results))
 
     return jsonify(station_list)
 
+#################################################
+@app.route("/api/v1.0/tobs")
+def tobs():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
 
-#@app.route("/api/v1.0/tobs")
-#def tobs():
+    # Query
+    most_active = session.query(measurement.tobs).\
+    filter(measurement.station == 'USC00519281').\
+    filter(measurement.date >= '2016-08-23').all()
 
+    session.close()
+
+    # Convert list of tuples into normal list
+    tobs_list = list(np.ravel(most_active))
+
+    return jsonify(tobs_list)
+
+#################################################
 #@app.route("/api/v1.0/<start>" and "/api/v1.0/<start>/<end>")
 #def <start> and <start>/<end>()
 
