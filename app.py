@@ -45,18 +45,34 @@ def precipitation():
         session = Session(engine)
 
         """Convert the query results to a dictionary using date as the key and prcp as the value."""
-        # Query
-        results = session.query(measurement.date, measurement.prcp).all()
+        # Starting from the most recent data point in the database. 
+        year_precip = session.query(measurement.date, measurement.prcp).\
+            filter(measurement.date >= '2016-08-23').order_by(measurement.date).all()
 
         session.close()
 
         # Convert list of tuples into normal list
-        all_names = list(np.ravel(results))
+        rain_list =[]
+        for date, prcp in year_precip:
+            rain_dict={}
+            rain_dict[date] = prcp
+            rain_list.append(rain_dict)
 
-        return jsonify(all_names)
+        return jsonify(rain_list)
 
-#@app.route("/api/v1.0/stations")
-#def stations():
+@app.route("/api/v1.0/stations")
+def stations():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    # Query Stations
+    results = session.query(station.name).all()
+
+    # Convert list of tuples into normal list
+    station_list = list(np.ravel(results))
+
+    return jsonify(station_list)
+
 
 #@app.route("/api/v1.0/tobs")
 #def tobs():
@@ -65,4 +81,4 @@ def precipitation():
 #def <start> and <start>/<end>()
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
